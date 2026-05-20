@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { analyzeSidequest } from '@/lib/analyze'
+import { checkAndAwardAchievements } from '@/lib/achievements'
 
 export const maxDuration = 60
 
@@ -63,5 +64,8 @@ export async function POST(req: NextRequest) {
     p_xp_delta: result.xp,
   })
 
-  return NextResponse.json(result)
+  // Check achievements
+  const newAchievements = await checkAndAwardAchievements(supabase, user.id, 'sidequest_published', { sidequestId })
+
+  return NextResponse.json({ ...result, newAchievements })
 }

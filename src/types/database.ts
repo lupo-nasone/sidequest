@@ -190,6 +190,50 @@ export interface Database {
         }
         Relationships: []
       }
+      achievements: {
+        Row: {
+          id: string
+          name: string
+          description: string
+          icon: string
+          xp_bonus: number
+          category: string
+        }
+        Insert: {
+          id: string
+          name: string
+          description: string
+          icon: string
+          xp_bonus?: number
+          category?: string
+        }
+        Update: {
+          name?: string
+          description?: string
+          icon?: string
+          xp_bonus?: number
+          category?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          id: string
+          user_id: string
+          achievement_id: string
+          earned_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          achievement_id: string
+          earned_at?: string
+        }
+        Update: {
+          earned_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -209,6 +253,8 @@ export interface Database {
   }
 }
 
+export type Achievement = Database['public']['Tables']['achievements']['Row']
+export type UserAchievement = Database['public']['Tables']['user_achievements']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Sidequest = Database['public']['Tables']['sidequests']['Row']
 export type SidequestMedia = Database['public']['Tables']['sidequest_media']['Row']

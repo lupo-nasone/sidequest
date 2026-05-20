@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Navbar from '@/components/Navbar'
+import AccentProvider from '@/components/AccentProvider'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,6 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
+      <AccentProvider />
       <Navbar profile={profile} />
       <main className="max-w-2xl mx-auto px-4 pt-6 pb-24">
         {children}

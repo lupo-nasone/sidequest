@@ -22,7 +22,7 @@ export default function NewSidequestPage() {
   const [mediaFiles, setMediaFiles] = useState<MediaPreview[]>([])
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<'form' | 'analyzing' | 'done'>('form')
-  const [analysisResult, setAnalysisResult] = useState<{ xp: number; analysis: string; rating: number } | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<{ xp: number; analysis: string; rating: number; newAchievements?: { id: string; name: string; icon: string; xp_bonus: number }[] } | null>(null)
   const [error, setError] = useState('')
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -112,7 +112,7 @@ export default function NewSidequestPage() {
         setError(data.error || "L'AI è momentaneamente sovraccarica. La sidequest è salvata — riprova tra qualche secondo.")
         setStep('form')
       } else {
-        setAnalysisResult({ xp: data.xp, analysis: data.analysis, rating: data.rating })
+        setAnalysisResult({ xp: data.xp, analysis: data.analysis, rating: data.rating, newAchievements: data.newAchievements || [] })
         setStep('done')
       }
     } catch {
@@ -153,6 +153,25 @@ export default function NewSidequestPage() {
           </p>
           <p className="text-zinc-200 leading-relaxed">{analysisResult.analysis}</p>
         </div>
+
+        {analysisResult.newAchievements && analysisResult.newAchievements.length > 0 && (
+          <div className="max-w-md w-full">
+            <p className="text-sm font-semibold text-yellow-400 mb-3 text-center">🏆 Achievement sbloccati!</p>
+            <div className="space-y-2">
+              {analysisResult.newAchievements.map(a => (
+                <div key={a.id} className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <span className="text-2xl">{a.icon}</span>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-bold text-white">{a.name}</p>
+                  </div>
+                  {a.xp_bonus > 0 && (
+                    <span className="text-xs font-bold text-yellow-400">+{a.xp_bonus} XP</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button
           onClick={() => router.push('/')}
