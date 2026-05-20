@@ -23,7 +23,7 @@ export async function analyzeSidequest(
     return mockAnalysis(title, description, imageUrls.length)
   }
 
-  const client = new Anthropic({ apiKey })
+  const client = new Anthropic({ apiKey, maxRetries: 3 })
 
   const imageContent: Anthropic.MessageParam['content'] = []
 
@@ -97,7 +97,7 @@ Rispondi SOLO con questo JSON (niente altro, zero testo fuori dal JSON):
   ]
 
   const response = await client.messages.create({
-    model: 'claude-opus-4-7',
+    model: 'claude-sonnet-4-6',
     max_tokens: 500,
     messages,
   })

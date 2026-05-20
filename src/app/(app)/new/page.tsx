@@ -108,11 +108,16 @@ export default function NewSidequestPage() {
         body: JSON.stringify({ sidequestId: sq.id }),
       })
       const data = await res.json()
-      setAnalysisResult({ xp: data.xp, analysis: data.analysis, rating: data.rating })
-      setStep('done')
+      if (res.status === 503) {
+        setError(data.error || "L'AI è momentaneamente sovraccarica. La sidequest è salvata — riprova tra qualche secondo.")
+        setStep('form')
+      } else {
+        setAnalysisResult({ xp: data.xp, analysis: data.analysis, rating: data.rating })
+        setStep('done')
+      }
     } catch {
       setStep('done')
-      setAnalysisResult({ xp: 50, analysis: 'Sidequest completata!', rating: 5 })
+      setAnalysisResult({ xp: 50, analysis: 'Sidequest salvata, analisi AI non disponibile al momento.', rating: 5 })
     }
 
     setLoading(false)

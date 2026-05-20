@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { analyzeSidequest } from '@/lib/analyze'
 
+export const maxDuration = 60
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -24,7 +26,16 @@ export async function POST(req: NextRequest) {
     .filter((m: { media_type: string; url: string }) => m.media_type === 'photo')
     .map((m: { url: string }) => m.url)
 
-  const result = await analyzeSidequest(sq.title, sq.description, imageUrls)
+  let result
+  try {
+    result = await analyzeSidequest(sq.title, sq.description, imageUrls)
+  } catch (err: unknown) {
+    const status = (err as { status?: number }).status
+    if (status === 529 || status === 503) {
+      return NextResponse.json({ error: 'AI momentaneamente sovraccarica, riprova tra qualche secondo.' }, { status: 503 })
+    }
+    throw err
+  }
 
   await supabase
     .from('sidequests')
