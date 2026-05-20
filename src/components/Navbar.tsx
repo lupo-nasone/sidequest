@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Home, PlusCircle, Users, User, Sword, LogOut, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types/database'
+import XPModal from './XPModal'
 
 interface NavbarProps {
   profile: Profile | null
@@ -57,17 +58,14 @@ export default function Navbar({ profile }: NavbarProps) {
 
         <div className="flex items-center gap-3">
           {profile && (
-            <div className="flex items-center gap-2">
+            <XPModal totalXP={profile.total_xp} currentLevel={profile.level}>
               <div className="text-right">
                 <p className="text-sm font-medium">{profile.display_name || profile.username}</p>
-                <p className="text-xs text-orange-400 font-semibold">Lv.{profile.level} · {profile.total_xp} XP</p>
+                <p className="text-xs text-orange-400 font-semibold hover:text-orange-300 transition-colors">Lv.{profile.level} · {profile.total_xp} XP ↗</p>
               </div>
-            </div>
+            </XPModal>
           )}
-          <button
-            onClick={handleLogout}
-            className="p-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
-          >
+          <button onClick={handleLogout} className="p-2 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors">
             <LogOut className="w-4 h-4" />
           </button>
         </div>

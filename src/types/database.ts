@@ -190,6 +190,26 @@ export interface Database {
         }
         Relationships: []
       }
+      sidequest_collabs: {
+        Row: {
+          id: string
+          sidequest_id: string
+          invited_user_id: string
+          status: 'pending' | 'accepted' | 'declined'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          sidequest_id: string
+          invited_user_id: string
+          status?: 'pending' | 'accepted' | 'declined'
+          created_at?: string
+        }
+        Update: {
+          status?: 'pending' | 'accepted' | 'declined'
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           id: string
@@ -253,6 +273,7 @@ export interface Database {
   }
 }
 
+export type SidequestCollab = Database['public']['Tables']['sidequest_collabs']['Row']
 export type Achievement = Database['public']['Tables']['achievements']['Row']
 export type UserAchievement = Database['public']['Tables']['user_achievements']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']

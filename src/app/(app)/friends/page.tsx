@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import FriendButton from '@/components/FriendButton'
 import SearchUsers from '@/components/SearchUsers'
+import CollabRequests from '@/components/CollabRequests'
 import { Trophy } from 'lucide-react'
 import type { Friendship, Profile } from '@/types/database'
 
@@ -18,30 +19,26 @@ export default async function FriendsPage() {
 
   const { data: rawFriendships } = await supabase
     .from('friendships')
-    .select(`
-      *,
-      requester:profiles!friendships_requester_id_fkey(*),
-      addressee:profiles!friendships_addressee_id_fkey(*)
-    `)
+    .select(`*, requester:profiles!friendships_requester_id_fkey(*), addressee:profiles!friendships_addressee_id_fkey(*)`)
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
 
   const friendships = (rawFriendships || []) as unknown as FriendWithProfile[]
-
   const accepted = friendships.filter(f => f.status === 'accepted')
   const pendingReceived = friendships.filter(f => f.status === 'pending' && f.addressee_id === user.id)
+  const friendIds = accepted.map(f => f.requester_id === user.id ? f.addressee_id : f.requester_id)
 
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold text-white">Amici</h1>
 
-      <SearchUsers currentUserId={user.id} />
+      <SearchUsers currentUserId={user.id} friendIds={friendIds} />
 
-      {/* Pending requests */}
+      {/* Pending friend requests */}
       {pendingReceived.length > 0 && (
         <section>
           <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">
-            Richieste ricevute ({pendingReceived.length})
+            Richieste amicizia ({pendingReceived.length})
           </h2>
           <div className="space-y-2">
             {pendingReceived.map(f => {
@@ -67,13 +64,16 @@ export default async function FriendsPage() {
         </section>
       )}
 
+      {/* Co-op requests */}
+      <CollabRequests userId={user.id} />
+
       {/* Friends list */}
       <section>
         <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">
           I tuoi amici ({accepted.length})
         </h2>
         {accepted.length === 0 ? (
-          <p className="text-zinc-600 text-sm py-4 text-center">Nessun amico ancora. Cercane qualcuno sopra!</p>
+          <p className="text-zinc-600 text-sm py-4 text-center">Nessun amico ancora.</p>
         ) : (
           <div className="space-y-2">
             {accepted.map(f => {

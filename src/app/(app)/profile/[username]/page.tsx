@@ -7,6 +7,7 @@ import SidequestCard from '@/components/SidequestCard'
 import FriendButton from '@/components/FriendButton'
 import Avatar from '@/components/Avatar'
 import AchievementBadge from '@/components/AchievementBadge'
+import XPModal from '@/components/XPModal'
 
 function getLevelTitle(level: number): string {
   if (level < 3) return 'Novice Adventurer'
@@ -102,14 +103,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
         {/* Level bar */}
         <div className="mt-5">
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="flex items-center gap-1.5">
-              <Trophy className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-semibold text-white">Lv.{profile.level}</span>
-              <span className="text-xs text-zinc-500">{getLevelTitle(profile.level)}</span>
+          <XPModal totalXP={profile.total_xp} currentLevel={profile.level}>
+            <div className="flex items-center justify-between mb-1.5 w-full">
+              <div className="flex items-center gap-1.5">
+                <Trophy className="w-4 h-4 text-orange-500" />
+                <span className="text-sm font-semibold text-white">Lv.{profile.level}</span>
+                <span className="text-xs text-zinc-500">{getLevelTitle(profile.level)}</span>
+              </div>
+              <span className="text-xs text-zinc-500 hover:text-orange-400 transition-colors">{xp.current}/{xp.needed} XP ↗</span>
             </div>
-            <span className="text-xs text-zinc-500">{xp.current}/{xp.needed} XP</span>
-          </div>
+          </XPModal>
           <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full transition-all"
               style={{ width: `${Math.min(100, xp.progress)}%` }} />

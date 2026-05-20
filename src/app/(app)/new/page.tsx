@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Upload, X, MapPin, Calendar, Loader2, Sparkles } from 'lucide-react'
 import Image from 'next/image'
+import CollabPicker from '@/components/CollabPicker'
 
 interface MediaPreview {
   file: File
@@ -21,8 +22,14 @@ export default function NewSidequestPage() {
   const [happenedAt, setHappenedAt] = useState(new Date().toISOString().slice(0, 16))
   const [mediaFiles, setMediaFiles] = useState<MediaPreview[]>([])
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<'form' | 'analyzing' | 'done'>('form')
-  const [analysisResult, setAnalysisResult] = useState<{ xp: number; analysis: string; rating: number; newAchievements?: { id: string; name: string; icon: string; xp_bonus: number }[] } | null>(null)
+  const [step, setStep] = useState<'form' | 'analyzing' | 'done' | 'collab'>('form')
+  const [publishedSidequestId, setPublishedSidequestId] = useState<string | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<{
+    xp: number; baseXP?: number; multiplier?: number | null
+    analysis: string; rating: number
+    leveledUp?: boolean; newLevel?: number | null
+    newAchievements?: { id: string; name: string; icon: string; xp_bonus: number }[]
+  } | null>(null)
   const [error, setError] = useState('')
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -72,6 +79,7 @@ export default function NewSidequestPage() {
       setLoading(false)
       return
     }
+    setPublishedSidequestId(sq.id)
 
     // Upload media files
     for (let i = 0; i < mediaFiles.length; i++) {
@@ -112,7 +120,7 @@ export default function NewSidequestPage() {
         setError(data.error || "L'AI è momentaneamente sovraccarica. La sidequest è salvata — riprova tra qualche secondo.")
         setStep('form')
       } else {
-        setAnalysisResult({ xp: data.xp, analysis: data.analysis, rating: data.rating, newAchievements: data.newAchievements || [] })
+        setAnalysisResult({ xp: data.xp, baseXP: data.baseXP, multiplier: data.multiplier, analysis: data.analysis, rating: data.rating, leveledUp: data.leveledUp, newLevel: data.newLevel, newAchievements: data.newAchievements || [] })
         setStep('done')
       }
     } catch {
@@ -142,8 +150,21 @@ export default function NewSidequestPage() {
           <Sparkles className="w-12 h-12 text-orange-500" />
         </div>
 
+        {analysisResult.leveledUp && analysisResult.newLevel && (
+          <div className="bg-yellow-500/15 border border-yellow-500/40 rounded-2xl px-6 py-4 text-center max-w-xs">
+            <p className="text-3xl mb-1">🎉</p>
+            <p className="text-lg font-black text-yellow-400">LEVEL UP!</p>
+            <p className="text-white font-semibold">Sei al Livello {analysisResult.newLevel}</p>
+          </div>
+        )}
+
         <div>
           <h2 className="text-3xl font-black text-white mb-1">+{analysisResult.xp} XP</h2>
+          {analysisResult.multiplier && analysisResult.multiplier > 1 && analysisResult.baseXP && (
+            <p className="text-sm text-emerald-400 mb-1">
+              {analysisResult.baseXP} XP × {analysisResult.multiplier.toFixed(2)} (bonus livello)
+            </p>
+          )}
           <p className="text-orange-400 font-semibold">Rating: {analysisResult.rating}/10</p>
         </div>
 
@@ -173,12 +194,23 @@ export default function NewSidequestPage() {
           </div>
         )}
 
-        <button
-          onClick={() => router.push('/')}
-          className="bg-orange-500 hover:bg-orange-400 text-white font-semibold py-3 px-8 rounded-xl transition-colors"
-        >
-          Vai al feed
-        </button>
+        <div className="max-w-md w-full space-y-3">
+          {publishedSidequestId && (
+            <CollabPicker sidequestId={publishedSidequestId} onDone={() => router.push('/')} />
+          )}
+          <button onClick={() => router.push('/')}
+            className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold py-3 px-8 rounded-xl transition-colors">
+            Vai al feed
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (step === 'collab' && publishedSidequestId) {
+    return (
+      <div className="max-w-md mx-auto pt-8">
+        <CollabPicker sidequestId={publishedSidequestId} onDone={() => router.push('/')} />
       </div>
     )
   }
