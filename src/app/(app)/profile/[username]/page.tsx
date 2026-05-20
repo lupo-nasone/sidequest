@@ -41,7 +41,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const isOwnProfile = user.id === profile.id
 
   const [{ data: raw }, { data: rawFriendship }, { data: allAchievements }, { data: earnedRaw }] = await Promise.all([
-    supabase.from('sidequests').select('*, profiles(*), sidequest_media(*), likes(id, user_id), comments(id)')
+    supabase.from('sidequests').select('*, profiles(*), sidequest_media(*), likes(id, user_id), comments(id), vouches(id, user_id)')
       .eq('user_id', profile.id).eq('is_published', true).order('created_at', { ascending: false }),
     supabase.from('friendships').select('*')
       .or(`and(requester_id.eq.${user.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${user.id})`)
@@ -55,7 +55,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     ...sq,
     likes_count: sq.likes?.length || 0,
     comments_count: sq.comments?.length || 0,
+    vouches_count: sq.vouches?.length || 0,
     user_has_liked: (sq.likes || []).some((l: { user_id: string }) => l.user_id === user.id),
+    user_has_vouched: (sq.vouches || []).some((v: { user_id: string }) => v.user_id === user.id),
+    is_verified: (sq.vouches?.length || 0) >= 2,
   }))
 
   const earnedIds = new Set((earnedRaw || []).map(r => r.achievement_id))

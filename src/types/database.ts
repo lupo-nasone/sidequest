@@ -190,6 +190,12 @@ export interface Database {
         }
         Relationships: []
       }
+      vouches: {
+        Row: { id: string; user_id: string; sidequest_id: string; created_at: string }
+        Insert: { id?: string; user_id: string; sidequest_id: string; created_at?: string }
+        Update: { id?: string }
+        Relationships: []
+      }
       sidequest_collabs: {
         Row: {
           id: string
@@ -283,12 +289,18 @@ export type Friendship = Database['public']['Tables']['friendships']['Row']
 export type Like = Database['public']['Tables']['likes']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']
 
+export type Vouch = Database['public']['Tables']['vouches']['Row']
+
 export type SidequestWithProfile = Sidequest & {
   profiles: Profile
   sidequest_media: SidequestMedia[]
   likes: Like[]
   comments: Comment[]
+  vouches: Vouch[]
   likes_count: number
   comments_count: number
+  vouches_count: number
   user_has_liked: boolean
+  user_has_vouched: boolean
+  is_verified: boolean
 }

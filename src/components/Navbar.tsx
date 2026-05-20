@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, PlusCircle, Users, User, Sword, LogOut, Settings } from 'lucide-react'
+import { Home, PlusCircle, Users, User, Sword, LogOut, Settings, CalendarDays } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types/database'
 import XPModal from './XPModal'
@@ -25,6 +25,7 @@ export default function Navbar({ profile }: NavbarProps) {
   const navItems = [
     { href: '/', icon: Home, label: 'Feed' },
     { href: '/new', icon: PlusCircle, label: 'Nuova' },
+    { href: '/calendar', icon: CalendarDays, label: 'Calendario' },
     { href: '/friends', icon: Users, label: 'Amici' },
     { href: profile ? `/profile/${profile.username}` : '/login', icon: User, label: 'Profilo' },
     { href: '/settings', icon: Settings, label: 'Impostazioni' },

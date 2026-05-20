@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Heart, MessageCircle, MapPin, Star, Zap, Trash2, MoreHorizontal } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Star, Zap, Trash2, MoreHorizontal, ShieldCheck, ShieldQuestion } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase/client'
@@ -20,6 +20,8 @@ export default function SidequestCard({ sidequest: sq, currentUserId }: Sideques
   const router = useRouter()
   const [liked, setLiked] = useState(sq.user_has_liked)
   const [likesCount, setLikesCount] = useState(sq.likes_count)
+  const [vouched, setVouched] = useState(sq.user_has_vouched)
+  const [vouchCount, setVouchCount] = useState(sq.vouches_count)
   const [mediaIndex, setMediaIndex] = useState(0)
   const [showMenu, setShowMenu] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -37,6 +39,20 @@ export default function SidequestCard({ sidequest: sq, currentUserId }: Sideques
       await supabase.from('likes').insert({ user_id: currentUserId, sidequest_id: sq.id })
       setLiked(true)
       setLikesCount(n => n + 1)
+    }
+  }
+
+  async function toggleVouch() {
+    if (isOwn) return
+    const supabase = createClient()
+    if (vouched) {
+      await supabase.from('vouches').delete().match({ user_id: currentUserId, sidequest_id: sq.id })
+      setVouched(false)
+      setVouchCount(n => n - 1)
+    } else {
+      await supabase.from('vouches').insert({ user_id: currentUserId, sidequest_id: sq.id })
+      setVouched(true)
+      setVouchCount(n => n + 1)
     }
   }
 
@@ -145,11 +161,23 @@ export default function SidequestCard({ sidequest: sq, currentUserId }: Sideques
 
       {/* Content */}
       <div className="p-4 pt-3" onClick={() => setShowMenu(false)}>
-        <Link href={`/sidequest/${sq.id}`}>
-          <h3 className="font-bold text-white text-lg leading-snug hover:text-orange-400 transition-colors mb-1">
-            {sq.title}
-          </h3>
-        </Link>
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <Link href={`/sidequest/${sq.id}`}>
+            <h3 className="font-bold text-white text-lg leading-snug hover:text-orange-400 transition-colors">
+              {sq.title}
+            </h3>
+          </Link>
+          {(sq.is_verified || vouchCount > 0) && (
+            <div className={`flex items-center gap-1 flex-shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${
+              sq.is_verified || vouchCount >= 2
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                : 'bg-zinc-800 text-zinc-500'
+            }`}>
+              <ShieldCheck className="w-3 h-3" />
+              {vouchCount >= 2 ? 'Verificata' : `${vouchCount}/2`}
+            </div>
+          )}
+        </div>
         {sq.description && (
           <p className="text-zinc-400 text-sm line-clamp-3 mb-3">{sq.description}</p>
         )}
@@ -172,6 +200,17 @@ export default function SidequestCard({ sidequest: sq, currentUserId }: Sideques
             <MessageCircle className="w-5 h-5" />
             {sq.comments_count > 0 && <span className="font-medium">{sq.comments_count}</span>}
           </Link>
+
+          {!isOwn && (
+            <button onClick={toggleVouch}
+              title={vouched ? 'Rimuovi testimonianza' : 'Testimonia che è successa davvero'}
+              className={`flex items-center gap-1.5 text-sm transition-colors ml-auto ${
+                vouched ? 'text-emerald-400' : 'text-zinc-500 hover:text-emerald-400'
+              }`}>
+              <ShieldQuestion className="w-5 h-5" />
+              {vouchCount > 0 && <span className="font-medium">{vouchCount}</span>}
+            </button>
+          )}
         </div>
       </div>
     </article>

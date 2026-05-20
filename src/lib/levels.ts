@@ -11,11 +11,11 @@ export interface LevelDef {
 
 export const LEVELS: LevelDef[] = [
   { level: 1,  xpRequired: 0,     title: 'Novice Adventurer',  icon: '🌱', frameColor: null,                    xpMultiplier: 1.00, reward: null,                                  rewardIcon: null },
-  { level: 2,  xpRequired: 100,   title: 'Wanderer',           icon: '👟', frameColor: null,                    xpMultiplier: 1.02, reward: 'Tutti i colori accent sbloccati',      rewardIcon: '🎨' },
+  { level: 2,  xpRequired: 100,   title: 'Wanderer',           icon: '👟', frameColor: null,                    xpMultiplier: 1.02, reward: '+2% XP bonus su ogni sidequest',      rewardIcon: '⚡' },
   { level: 3,  xpRequired: 400,   title: 'Quest Seeker',       icon: '🗺️', frameColor: 'frame-bronze',           xpMultiplier: 1.05, reward: 'Cornice Bronze sul profilo',          rewardIcon: '🥉' },
   { level: 4,  xpRequired: 900,   title: 'Trailblazer',        icon: '🔥', frameColor: 'frame-bronze',           xpMultiplier: 1.08, reward: '+8% XP su ogni sidequest',           rewardIcon: '⚡' },
   { level: 5,  xpRequired: 1600,  title: 'Explorer',           icon: '🧭', frameColor: 'frame-silver',           xpMultiplier: 1.12, reward: 'Cornice Silver sul profilo',          rewardIcon: '🥈' },
-  { level: 6,  xpRequired: 2500,  title: 'Veteran Wanderer',   icon: '⚔️', frameColor: 'frame-silver',           xpMultiplier: 1.15, reward: 'Post in co-op con gli amici',         rewardIcon: '🤝' },
+  { level: 6,  xpRequired: 2500,  title: 'Veteran Wanderer',   icon: '⚔️', frameColor: 'frame-silver',           xpMultiplier: 1.15, reward: 'Cornice Silver sul profilo',          rewardIcon: '🥈' },
   { level: 7,  xpRequired: 3600,  title: 'Daring Soul',        icon: '💥', frameColor: 'frame-silver',           xpMultiplier: 1.20, reward: '+20% XP su ogni sidequest',          rewardIcon: '📈' },
   { level: 8,  xpRequired: 4900,  title: 'Legendary Wanderer', icon: '🏆', frameColor: 'frame-gold',             xpMultiplier: 1.25, reward: 'Cornice Gold sul profilo',            rewardIcon: '🥇' },
   { level: 9,  xpRequired: 6400,  title: 'Epic Adventurer',    icon: '⚡', frameColor: 'frame-gold',             xpMultiplier: 1.30, reward: '+30% XP su ogni sidequest',          rewardIcon: '🚀' },

@@ -17,7 +17,8 @@ export default async function SidequestPage({ params }: { params: Promise<{ id: 
       profiles(*),
       sidequest_media(*),
       likes(id, user_id),
-      comments(*, profiles(username, display_name))
+      comments(*, profiles(username, display_name)),
+      vouches(id, user_id)
     `)
     .eq('id', id)
     .single()
@@ -30,7 +31,10 @@ export default async function SidequestPage({ params }: { params: Promise<{ id: 
     ...r,
     likes_count: r.likes?.length || 0,
     comments_count: r.comments?.length || 0,
+    vouches_count: r.vouches?.length || 0,
     user_has_liked: (r.likes || []).some((l: { user_id: string }) => l.user_id === user.id),
+    user_has_vouched: (r.vouches || []).some((v: { user_id: string }) => v.user_id === user.id),
+    is_verified: (r.vouches?.length || 0) >= 2,
   }
 
   return (
