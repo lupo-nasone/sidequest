@@ -1,0 +1,155 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Heart, MessageCircle, MapPin, Star, Zap } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { it } from 'date-fns/locale'
+import { createClient } from '@/lib/supabase/client'
+import type { SidequestWithProfile } from '@/types/database'
+
+interface SidequestCardProps {
+  sidequest: SidequestWithProfile
+  currentUserId: string
+}
+
+export default function SidequestCard({ sidequest: sq, currentUserId }: SidequestCardProps) {
+  const [liked, setLiked] = useState(sq.user_has_liked)
+  const [likesCount, setLikesCount] = useState(sq.likes_count)
+  const [mediaIndex, setMediaIndex] = useState(0)
+
+  async function toggleLike() {
+    const supabase = createClient()
+    if (liked) {
+      await supabase.from('likes').delete().match({ user_id: currentUserId, sidequest_id: sq.id })
+      setLiked(false)
+      setLikesCount(n => n - 1)
+    } else {
+      await supabase.from('likes').insert({ user_id: currentUserId, sidequest_id: sq.id })
+      setLiked(true)
+      setLikesCount(n => n + 1)
+    }
+  }
+
+  const photos = sq.sidequest_media.filter(m => m.media_type === 'photo')
+  const videos = sq.sidequest_media.filter(m => m.media_type === 'video')
+  const allMedia = [...photos, ...videos]
+
+  return (
+    <article className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 p-4 pb-3">
+        <Link href={`/profile/${sq.profiles.username}`}>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            {sq.profiles.display_name?.[0]?.toUpperCase() || sq.profiles.username[0].toUpperCase()}
+          </div>
+        </Link>
+        <div className="flex-1 min-w-0">
+          <Link href={`/profile/${sq.profiles.username}`} className="font-semibold text-white hover:text-orange-400 transition-colors">
+            {sq.profiles.display_name || sq.profiles.username}
+          </Link>
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <span>{formatDistanceToNow(new Date(sq.happened_at), { addSuffix: true, locale: it })}</span>
+            {sq.location && (
+              <>
+                <span>·</span>
+                <span className="flex items-center gap-0.5">
+                  <MapPin className="w-3 h-3" />{sq.location}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+        {sq.xp_earned > 0 && (
+          <div className="flex items-center gap-1 bg-orange-500/20 text-orange-400 text-xs font-bold px-2.5 py-1 rounded-full">
+            <Zap className="w-3 h-3" />
+            +{sq.xp_earned} XP
+          </div>
+        )}
+      </div>
+
+      {/* Media */}
+      {allMedia.length > 0 && (
+        <div className="relative aspect-square bg-zinc-800">
+          {allMedia[mediaIndex].media_type === 'photo' ? (
+            <Image
+              src={allMedia[mediaIndex].url}
+              alt={sq.title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <video
+              src={allMedia[mediaIndex].url}
+              controls
+              className="w-full h-full object-cover"
+            />
+          )}
+
+          {allMedia.length > 1 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {allMedia.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setMediaIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${i === mediaIndex ? 'bg-white' : 'bg-white/40'}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {allMedia[mediaIndex].ai_description && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-3">
+              <p className="text-xs text-zinc-300 line-clamp-2">
+                <Star className="w-3 h-3 inline mr-1 text-orange-400" />
+                {allMedia[mediaIndex].ai_description}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="p-4 pt-3">
+        <Link href={`/sidequest/${sq.id}`}>
+          <h3 className="font-bold text-white text-lg leading-snug hover:text-orange-400 transition-colors mb-1">
+            {sq.title}
+          </h3>
+        </Link>
+
+        {sq.description && (
+          <p className="text-zinc-400 text-sm line-clamp-3 mb-3">{sq.description}</p>
+        )}
+
+        {sq.ai_analysis && (
+          <div className="bg-zinc-800/60 rounded-xl p-3 mb-3">
+            <p className="text-xs text-orange-400 font-semibold mb-1 flex items-center gap-1">
+              <Star className="w-3 h-3" /> AI Rating: {sq.ai_rating}/10
+            </p>
+            <p className="text-xs text-zinc-300 line-clamp-2">{sq.ai_analysis}</p>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 pt-1">
+          <button
+            onClick={toggleLike}
+            className={`flex items-center gap-1.5 text-sm transition-colors ${liked ? 'text-red-400' : 'text-zinc-500 hover:text-red-400'}`}
+          >
+            <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
+            {likesCount > 0 && <span className="font-medium">{likesCount}</span>}
+          </button>
+
+          <Link
+            href={`/sidequest/${sq.id}`}
+            className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            <MessageCircle className="w-5 h-5" />
+            {sq.comments_count > 0 && <span className="font-medium">{sq.comments_count}</span>}
+          </Link>
+        </div>
+      </div>
+    </article>
+  )
+}
